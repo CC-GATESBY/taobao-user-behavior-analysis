@@ -1,30 +1,26 @@
 # Data Analytics Portfolio | Wenshuo Cai
 
-我的个人数据分析作品集，记录如何从公开数据出发，检查数据质量、定义指标、拆解变化并形成有证据支持的业务判断。代码、实际运行的 Notebook、聚合结果和分析备忘录均可查看。
+这里收录我的公开数据分析项目。目前完成的淘宝案例关注一个问题：**购买人数增加时，为什么活跃用户购买率反而下降？** 2017 年 12 月 2 日，样本购买用户比前一天增加 340 人，购买率下降 0.89 个百分点。分析从这组变化出发，检查活跃规模、两天用户构成和加购后的购买路径。
 
-**技术栈：** SQL · DuckDB · Python · pandas · Matplotlib · Jupyter
+先看[案例说明](projects/taobao-user-behavior/README.md)了解结果；[业务备忘录](projects/taobao-user-behavior/reports/business_memo.md)展开证据与待核查问题；[Notebook](projects/taobao-user-behavior/analysis.ipynb)保留查询、实际输出和图表。
 
 ## 已完成项目
 
-| 项目 | 分析问题与方法 | 阅读入口 |
+| 项目 | 分析问题 | 阅读入口 |
 |---|---|---|
-| 淘宝用户行为分析 | 购买人数变化如何对应活跃规模、购买率与用户构成？用户级抽样、质量失败退出、对称分解、同星期参照、人群与严格加购路径分析。 | [案例说明](projects/taobao-user-behavior/README.md) · [Notebook](projects/taobao-user-behavior/analysis.ipynb) · [业务备忘录](projects/taobao-user-behavior/reports/business_memo.md) |
+| 淘宝用户行为分析 | 购买人数增长来自怎样的活跃规模与用户构成变化？前一天未活跃的人，此前是否出现、加购后是否购买？ | [项目与复现入口](projects/taobao-user-behavior/README.md) |
 
 ## 淘宝案例：主要发现
 
 基于公开数据的用户样本，北京时间 2017-11-25 至 12-03 共 993,560 条行为记录、9,915 位用户。比较 12 月 1 日与 12 月 2 日：
 
-- 购买用户从 **1,407 增至 1,747**，净增 340；活跃规模项 +416.75、购买率项 −76.75。
-- 仅后一天活跃、两天均活跃、仅前一天活跃三组分别贡献 **+388、−9、−39** 位购买用户。
-- 购买行为记录从 **2,096 增至 2,605**；品类正向增量 1,250、负向变化 −741。增长前十品类贡献正向增量的 **9.36%**。
+- **人数增长对应活跃规模扩大。** 购买用户从 1,407 增至 1,747，对称分解中的活跃规模项为 +416.75、购买率项为 −76.75。换用同周六、同周日作参照，仍是购买人数上升、购买率下降。
+- **前一天未活跃的人不等于新用户。** 12 月 1 日未活跃、12 月 2 日活跃的 2,411 人贡献 388 位购买用户；这些人全部在 11 月 25—30 日出现过。
+- **人群差异取决于观察什么。** 上述人群的日用户购买率低于两天均活跃组，但 24小时加购商品对后续购买率为 5.19%，高于另一组的 3.16%。两种指标的分母和时间窗不同，不能据此判断哪组用户质量更好。
 
 ![淘宝样本的每日活跃用户、购买用户与购买率](projects/taobao-user-behavior/outputs/daily_metrics.png)
 
-这是公开数据的个人实践。购买记录不等于订单，仅后一天活跃不等于新注册，数量分解不证明促销或推荐策略的因果效果。详细口径、限制及两条复现路线见[案例 README](projects/taobao-user-behavior/README.md)。
-
-新增分析显示 after_only 的 2,411 人全部在更早六天出现；严格加购商品对的后续购买率为 5.19%，高于 both_days 的 3.16%。这与用户购买率排序不同，提示需要区分分母、人群筛选和时间窗。完整证据见[业务备忘录](projects/taobao-user-behavior/reports/business_memo.md)。
-
-[后续实验设计](projects/taobao-user-behavior/reports/experiment_design.md) 已完成方案撰写，**尚未实施**，没有实验提升结论。
+这是公开数据的个人项目，结论仅针对样本。购买记录不等于订单，数量分解不能证明促销或推荐策略的效果。12 月 2、3 日接近全样本用户活跃，来源的入选规则与采集范围仍需核查。
 
 ## 后续项目方向
 
@@ -32,4 +28,4 @@
 
 ## 浏览与复现
 
-招聘方可直接阅读案例说明、业务备忘录和带输出的 Notebook，无需下载原始数据。复跑需要按[数据说明](projects/taobao-user-behavior/data/README.md)自行获取原 CSV，或使用已有 DuckDB 样本表。仓库只公开源代码、说明、聚合 CSV 和图表。
+查看结果无需下载原始数据。复跑可从原 CSV 开始，也可复用已有样本表，命令见[案例运行说明](projects/taobao-user-behavior/README.md#运行与验证)。技术栈为 SQL、DuckDB、Python、pandas、Matplotlib 和 Jupyter；仓库公开源代码、说明、聚合 CSV 和图表。

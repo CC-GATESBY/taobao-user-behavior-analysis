@@ -20,7 +20,7 @@ import duckdb
 import pandas as pd
 
 from prepare_data import SCHEMA, prepare_sample
-from run_analysis import enforce_quality, run_analysis
+from run_analysis import category_totals, enforce_quality, run_analysis
 
 SQL = (PROJECT / "analysis.sql").read_text()
 
@@ -74,6 +74,29 @@ class AnalysisTests(unittest.TestCase):
     def run_quietly(self, db=None):
         with contextlib.redirect_stdout(io.StringIO()):
             return run_analysis(db or self.db, self.output)
+
+    def test_notebook_category_share_handles_zero_and_positive_denominators(self):
+        notebook = json.loads((PROJECT / "analysis.ipynb").read_text())
+        cell = next(c for c in notebook["cells"] if c["id"] == "taobao-048")
+        code = compile("".join(cell["source"]), "taobao-048", "exec")
+        cases = {
+            "no_growth": [-3, -1, 0],
+            "positive_growth": list(range(1, 12)) + [-3, 0],
+        }
+        for name, changes in cases.items():
+            with self.subTest(case=name):
+                frame = pd.DataFrame({"buy_event_change": changes})
+                scope = {"pd": pd, "category_change": frame}
+                with contextlib.redirect_stdout(io.StringIO()):
+                    exec(code, scope)
+                result = scope["category_summary"]
+                pd.testing.assert_frame_equal(result, category_totals(frame))
+                share = result.loc["top10_share_of_positive_change", "value"]
+                if name == "no_growth":
+                    self.assertTrue(pd.isna(share))
+                    self.assertEqual(result.loc["positive_change_total", "value"], 0)
+                else:
+                    self.assertAlmostEqual(share, 65 / 66)
 
     def test_normalized_purchase_duplicates_and_notebook_agree(self):
         buy = event("001", "x", " buy ", "2017-12-02 10:00")
