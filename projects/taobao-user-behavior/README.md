@@ -92,7 +92,7 @@ python run_analysis.py --db data/taobao.duckdb --output outputs
 python run_analysis.py --db ../../taobao.duckdb --output outputs
 ```
 
-如果希望 Notebook 也使用原本根目录的数据，可在 macOS / Linux 终端设置相对路径：
+Notebook 会优先检查本案例的 `data/UserBehavior.csv`；不存在时自动识别根目录的 `../../UserBehavior.csv`，并使用同目录数据库。本机原文件无需移动即可直接运行。也可在 macOS / Linux 终端显式指定相对路径：
 
 ```bash
 TAOBAO_CSV=../../UserBehavior.csv TAOBAO_DB=../../taobao.duckdb jupyter lab analysis.ipynb
