@@ -1,2 +1,2 @@
-total_records,missing_user_id,missing_item_id,missing_category_id,invalid_behavior,invalid_timestamp
-994112,0,0,0,0,0
+total_records,normalized_behavior_records,missing_user_id,missing_item_id,missing_category_id,invalid_behavior,invalid_timestamp
+994112,0,0,0,0,0,0

@@ -1,0 +1,3 @@
+history_group,users,buyers,buyer_rate,event_records,pv_events,cart_events,buy_events,cart_users,events_per_user
+not_seen_earlier_in_window,0,0.0,,0.0,0.0,0.0,0.0,0,
+seen_earlier_in_window,2411,388.0,0.160929075072584,25597.0,22773.0,1499.0,592.0,673,10.616756532559105

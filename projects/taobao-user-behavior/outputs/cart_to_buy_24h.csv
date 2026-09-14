@@ -1,0 +1,4 @@
+cohort,start_pairs,excluded_incomplete_pairs,eligible_pairs,eligible_users,success_pairs,same_second_buy_pairs,same_second_only_pairs,cart_item_pair_buy_rate_24h
+after_only,1485,0,1485,673,77,0,0,0.05185185185185185
+all,7438,0,7438,3251,265,0,0,0.03562785695079322
+both_days,5953,0,5953,2578,188,0,0,0.03158071560557702

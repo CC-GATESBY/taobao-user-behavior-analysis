@@ -15,6 +15,7 @@ analysis_events.csv
 user_two_day.csv
 final_events.csv
 final_user_two_day.csv
+final_cart_pair_outcomes.csv
 raw_events.csv
 *_user_details.csv
 *_event_details.csv
@@ -38,6 +39,7 @@ __pycache__/
 .pytest_cache/
 .cache/
 .tmp/
+.taobao-output-*/
 tmp/
 temp/
 *.tmp

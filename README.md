@@ -8,7 +8,7 @@
 
 | 项目 | 分析问题与方法 | 阅读入口 |
 |---|---|---|
-| 淘宝用户行为分析 | 购买人数变化如何对应活跃规模、购买率与用户构成？用户级哈希抽样、质量检查、对称分解与品类变化核对。 | [案例说明](projects/taobao-user-behavior/README.md) · [Notebook](projects/taobao-user-behavior/analysis.ipynb) · [业务备忘录](projects/taobao-user-behavior/reports/business_memo.md) |
+| 淘宝用户行为分析 | 购买人数变化如何对应活跃规模、购买率与用户构成？用户级抽样、质量失败退出、对称分解、同星期参照、人群与严格加购路径分析。 | [案例说明](projects/taobao-user-behavior/README.md) · [Notebook](projects/taobao-user-behavior/analysis.ipynb) · [业务备忘录](projects/taobao-user-behavior/reports/business_memo.md) |
 
 ## 淘宝案例：主要发现
 
@@ -21,6 +21,10 @@
 ![淘宝样本的每日活跃用户、购买用户与购买率](projects/taobao-user-behavior/outputs/daily_metrics.png)
 
 这是公开数据的个人实践。购买记录不等于订单，仅后一天活跃不等于新注册，数量分解不证明促销或推荐策略的因果效果。详细口径、限制及两条复现路线见[案例 README](projects/taobao-user-behavior/README.md)。
+
+新增分析显示 after_only 的 2,411 人全部在更早六天出现；严格加购商品对的后续购买率为 5.19%，高于 both_days 的 3.16%。这与用户购买率排序不同，提示需要区分分母、人群筛选和时间窗。完整证据见[业务备忘录](projects/taobao-user-behavior/reports/business_memo.md)。
+
+[后续实验设计](projects/taobao-user-behavior/reports/experiment_design.md) 已完成方案撰写，**尚未实施**，没有实验提升结论。
 
 ## 后续项目方向
 

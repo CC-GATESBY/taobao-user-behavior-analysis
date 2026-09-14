@@ -32,7 +32,8 @@
 | [run_analysis.py](run_analysis.py) | 复跑下游 SQL、计算分解、导出聚合 CSV 与趋势图 |
 | [数据说明](data/README.md) | 来源、字段、文件位置及下载说明 |
 | [outputs](outputs/) | 日指标、人群、品类、质量检查与分解结果 |
-| [复现核验](reports/reproduction_checks.md) | 本次迁移实际执行的检查与边界 |
+| [实验方案](reports/experiment_design.md) | 方案设计，尚未实施；资格、随机化、指标与判断规则 |
+| [复现核验](reports/reproduction_checks.md) | 本轮修复实际执行的检查与边界 |
 
 ## 数据与方法
 
@@ -74,7 +75,7 @@ python prepare_data.py --csv data/UserBehavior.csv --db data/taobao.duckdb
 python run_analysis.py --db data/taobao.duckdb --output outputs
 ```
 
-也可从本案例目录运行 `jupyter lab analysis.ipynb`，选择上述环境后从头执行。数据库尚无 `sample_events` 时，Notebook 读取 CSV 并建立样本；已有样本时复用。Notebook 前几个单元检查 CSV 字段，因此始终需要原 CSV；只有下游脚本不需要原 CSV。
+也可从本案例目录运行 `jupyter lab analysis.ipynb`，选择上述环境后从头执行。数据库文件不存在时，Notebook 读取 CSV 并建立样本；已有文件必须包含符合字段约定的 `sample_events`，否则停止并报告。Notebook 前几个单元检查 CSV 字段，因此始终需要原 CSV；只有下游脚本不需要原 CSV。
 
 `prepare_data.py` 拒绝覆盖现有数据库。需要重新抽样时请指定一个新的 `--db` 文件名；不要删除原数据或现有样本来重复本案例。
 
@@ -98,9 +99,40 @@ Notebook 会优先检查本案例的 `data/UserBehavior.csv`；不存在时自�
 TAOBAO_CSV=../../UserBehavior.csv TAOBAO_DB=../../taobao.duckdb jupyter lab analysis.ipynb
 ```
 
-确保选用同一 Python 环境。Notebook 会创建或更新 `analysis_events`、`user_two_day` 派生表，并在最后关闭连接。`run_analysis.py` 则以只读方式打开已有数据库，只建立临时派生表；不会修改 `sample_events` 或持久化的其他表。它会覆盖指定输出目录的同名聚合文件，保留其他文件。
+确保选用同一 Python 环境。Notebook 也以只读方式打开已有数据库，只创建临时派生表，并在最后关闭连接；不存在数据库时通过 `prepare_data.py` 先创建新样本。`run_analysis.py` 则以只读方式打开已有数据库，只建立临时派生表；不会修改 `sample_events` 或持久化的其他表。所有质量检查、汇总核对和图片生成成功后，才替换输出目录中的同名文件，保留其他文件。质量失败时返回非零状态，不覆盖旧结果。
 
 `run_analysis.py` **不是**原始 CSV 的读取和抽样入口；空数据库应先走路线 A。两个入口均在不复制原 CSV 的情况下工作，`--csv` 可直接指向已有文件。
+
+## 质量规则与新增分析
+
+原始 `behavior_type` 保留，新增 `behavior_type_clean = TRIM(behavior_type)`。合法值只允许 `pv/fav/cart/buy`，不自动转大小写。SQL 和 Notebook 独立核心查询统一使用 clean 字段，报告规范化记录数。原 ID 和用户抽样逻辑不变。
+
+质量检查覆盖**全部 sample_events，先于时间筛选和正式指标**。非法／缺失行为、缺失 user/item/category ID 或不可解析时间戳任一非零就报告计数并停止；不会把非法行为用户放入活跃分母。时间窗外有效记录仍排除并披露；完全重复仍按五个原始字段识别并保留。本次真实样本规范化 0 条、质量问题均为 0，所以原数值保持不变。
+
+新增结果：
+
+- 同周六购买人数 1,349 → 1,747，购买率 18.91% → 17.98%（−0.94 个百分点）；同周日购买人数 1,375 → 1,725，购买率 19.09% → 17.78%（−1.31 个百分点）。[完整比较表](outputs/weekday_comparison.csv) 含活跃和购买人数的绝对／相对变化。
+- 12 月 2 日、3 日的样本活跃占比为 98.01%、97.85%，分母是窗口内 9,915 位样本用户，不能解释为平台渗透率。接近全样本活跃，需核查源数据入选与采集范围。
+- after_only 的 2,411 人全部在 11 月 25—30 日出现；“此前未出现”组为 0，率无定义。[人群历史表](outputs/after_only_history.csv) 汇总回 2,411 人、388 位购买用户，不将其称为新注册或长期沉默老客。
+- **24小时加购商品对后续购买率**：after_only 为 77/1,485=5.19%，both_days 为 188/5,953=3.16%。以 12 月 2 日首次加购为起点，按同用户同商品 `(t0,t0+24h]` 严格后续购买计成功；重复不放大分子分母，同秒单列。完整观察要求 `t0+24h` 严格早于窗口右端；本次排除不足观察对数为 0，同秒购买对数为 0。详见 [路径汇总](outputs/cart_to_buy_24h.csv)。
+
+![样本覆盖与加购路径](outputs/context_diagnostics.png)
+
+九天仅能提供有限同星期参照，不能建立稳定季节性基线或证明周末／活动造成变化。用户购买率与商品对路径率分母不同，组间排序也不同，不能据此认定某组质量差或产品有故障。
+
+[业务备忘录](reports/business_memo.md) 给出证据和决策边界；[实验设计](reports/experiment_design.md) 将候选解释转为可检验的方案，尚未实施，不报告提升结果。
+
+## 回归验证
+
+从本案例目录运行：
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+7 个测试使用临时合成数据库，覆盖空白购买与 Notebook/SQL 一致性、非法和缺失字段失败、旧结果保护、重复保留、历史窗口、加购去重与顺序／观察边界，以及 CSV 的 VARCHAR 用户 hash 抽样。无需额外测试框架，不接触真实原库。
+
+扩展 SQL 由 Notebook 和终端共用，避免定义分叉；独立的 Notebook 核心查询也参与回归比较。当前导出 **13 份聚合 CSV、2 张图**。质量失败不会替换旧 CSV／PNG；临时目录完整生成后逐文件替换，不宣称多文件替换在断电或磁盘故障下是一个原子事务。
 
 ## 结论边界
 
