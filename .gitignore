@@ -1,0 +1,55 @@
+# Raw source and local databases; aggregate CSVs remain publishable.
+UserBehavior.csv
+UserBehavior.csv.*
+**/data/raw/
+**/data/interim/
+*.duckdb
+*.duckdb.*
+*.wal
+*.db
+*.db-journal
+
+# Event-level and user-level exports.
+sample_events.csv
+analysis_events.csv
+user_two_day.csv
+final_events.csv
+final_user_two_day.csv
+raw_events.csv
+*_user_details.csv
+*_event_details.csv
+
+# Local archives, backups, environments, caches and temporary files.
+.local/
+private/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.gz
+*.7z
+*.rar
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.cache/
+.tmp/
+tmp/
+temp/
+*.tmp
+*.log
+.DS_Store
+.vscode/
+
+# Credentials and personal application preparation.
+.env
+.env.*
+*.pem
+*.key
+credentials*.json
+secrets*.json
+resume_and_interview.md

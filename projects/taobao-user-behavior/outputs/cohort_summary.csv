@@ -1,0 +1,4 @@
+cohort,users,active_before,active_after,buyers_before,buyers_after,rate_before,rate_after,buyer_change
+after_only,2411,0.0,2411.0,0.0,388.0,,0.160929075072584,388.0
+both_days,7307,7307.0,7307.0,1368.0,1359.0,0.18721773641713427,0.185986040782811,-9.0
+before_only,149,149.0,0.0,39.0,0.0,0.26174496644295303,,-39.0
